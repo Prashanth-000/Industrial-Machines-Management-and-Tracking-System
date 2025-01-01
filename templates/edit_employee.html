@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Employee</title>
+    <style>
+        /* Reset defaults */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #bfd8df, #99adcc); /* Light gradient background */
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar styling */
+        .navbar {
+            background-color: #004080; /* Deep blue */
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for elevation */
+        }
+
+        .navbar a {
+            color: #fff;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-right: 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #ffd700; /* Gold for hover */
+            color: #004080;
+        }
+
+        .navbar a.active {
+            background-color: #ffd700; /* Gold for active link */
+            color: #004080;
+            font-weight: bold;
+        }
+
+        /* Container for form */
+        .container {
+            width: 600px; /* Decrease width of the form container */
+            margin: 80px auto 20px; /* Space for the navbar and center alignment */
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.2rem; /* Slightly smaller heading */
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input, select, button {
+            padding: 10px; /* Smaller padding for inputs */
+            margin-bottom: 12px; /* Reduced space between inputs */
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            padding: 10px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Flash message styling */
+        .flashes {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .flashes li {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .alert-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .alert-error {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .alert-info {
+            background-color: #3498db;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="/" >Home</a>
+        <a href="/machines">Machines</a>
+        <a href="/employees" class="active">Employees</a>
+        <a href="/workorders">Work Orders</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <!-- Edit Employee Form -->
+    <div class="container">
+        <h1>Edit Employee</h1>
+
+        <!-- Flash messages for success or error -->
+        
+
+        <!-- Form to edit employee -->
+        <form action="/edit_employee/{{ employee[0] }}" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" name="name" id="name" value="{{ employee[1] }}" required><br>
+
+            <label for="phone_number">Phone Number:</label>
+            <input type="text" name="phone_number" id="phone_number" value="{{ employee[2] }}"><br>
+
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="email" value="{{ employee[3] }}"><br>
+
+            <label for="address">Address:</label>
+            <textarea name="address" id="address">{{ employee[4] }}</textarea><br>
+
+            <label for="date_of_hire">Date of Hire:</label>
+            <input type="date" name="date_of_hire" id="date_of_hire" value="{{ employee[5] }}" required><br>
+
+            <label for="status">Status:</label>
+            <select name="status" id="status" required>
+                <option value="Active" {% if employee[6] == 'Active' %}selected{% endif %}>Active</option>
+                <option value="Inactive" {% if employee[6] == 'Inactive' %}selected{% endif %}>Inactive</option>
+            </select><br>
+
+            <button type="submit">Update Employee</button>
+        </form>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employees</title>
+    <style>
+        /* Reset defaults */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #bfd8df, #99adcc); /* Light gradient background */
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar styling */
+        .navbar {
+            background-color: #004080; /* Deep blue */
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for elevation */
+        }
+
+        .navbar a {
+            color: #fff;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-right: 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #ffd700; /* Gold for hover */
+            color: #004080;
+        }
+
+        .navbar a.active {
+            background-color: #ffd700; /* Gold for active link */
+            color: #004080;
+            font-weight: bold;
+        }
+
+        /* Table Container */
+        .table-container {
+            width: 95%;
+            margin-top: 80px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            margin-left: auto;
+            margin-right: auto;
+            flex-direction: column;
+        }
+
+        .add-employee-btn {
+            align-self: flex-start;
+            background-color: #28a745; /* Green for Add button */
+            color: white;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .add-employee-btn:hover {
+            background-color: #218838;
+            transform: translateY(-3px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #004080;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        td {
+            background-color: white;
+        }
+
+        td a {
+            padding: 8px 15px;
+            margin-right: 10px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Edit Button Styling */
+        .action-btn.edit {
+            background-color: #3498db;
+        }
+
+        .action-btn.edit:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+        }
+
+        /* Delete Button Styling */
+        .action-btn.delete {
+            background-color: #e74c3c;
+        }
+
+        .action-btn.delete:hover {
+            background-color: #c0392b;
+            transform: translateY(-3px);
+        }
+
+        /* Confirmation Dialog */
+        #confirmation-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .confirmation-box {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .confirmation-box h3 {
+            margin-bottom: 20px;
+        }
+
+        .confirmation-box .btn {
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .confirmation-box .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .confirmation-box .cancel-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .confirmation-box .btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="/" >Home</a>
+        <a href="/machines">Machines</a>
+        <a href="/employees" class="active">Employees</a>
+        <a href="/workorders">Work Orders</a>
+    </div>
+
+    <!-- Add New Employee Button -->
+    <div class="table-container">
+        <a href="/add_employee" class="add-employee-btn">Add New Employee</a>
+
+        <!-- Employees Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone Number</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                    <th>Date of Hire</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if employees %}
+                    {% for employee in employees %}
+                        <tr>
+                            <td>{{ employee[1] }}</td>
+                            <td>{{ employee[2] }}</td>
+                            <td>{{ employee[3] }}</td>
+                            <td>{{ employee[4] }}</td>
+                            <td>{{ employee[5] }}</td>
+                            <td>{{ employee[6] }}</td>
+                            <td>
+                                <a href="/edit_employee/{{ employee[0] }}" class="action-btn edit">Edit</a>
+                                <a href="#" class="action-btn delete" onclick="confirmDelete({{ employee[0] }}); return false;">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7">No employees found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Confirmation Dialog (Initially hidden) -->
+    <div id="confirmation-dialog">
+        <div class="confirmation-box">
+            <h3>Are you sure you want to delete this employee?</h3>
+            <button id="confirm-delete" class="btn delete-btn">Yes, Delete</button>
+            <button id="cancel-delete" class="btn cancel-btn">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let employeeIdToDelete = null;
+
+        function confirmDelete(employeeId) {
+            // Store the employeeId for deletion
+            employeeIdToDelete = employeeId;
+
+            // Show the confirmation dialog
+            document.getElementById('confirmation-dialog').style.display = 'flex';
+
+            // Handle "Yes, Delete" button click
+            document.getElementById('confirm-delete').onclick = function() {
+                // Perform the deletion by redirecting to the delete route
+                window.location.href = "/delete_employee/" + employeeIdToDelete;
+            };
+
+            // Handle "Cancel" button click
+            document.getElementById('cancel-delete').onclick = function() {
+                // Hide the confirmation dialog
+                document.getElementById('confirmation-dialog').style.display = 'none';
+            };
+        }
+    </script>
+
+</body>
+</html>

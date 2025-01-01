@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(120deg, #1d3557, #457b9d, #a8dadc);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        h2 {
+            font-size: 2rem;
+            color: #1d3557;
+            margin-bottom: 1.5rem;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            text-align: left;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #457b9d;
+        }
+        input {
+            padding: 0.75rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #457b9d;
+            outline: none;
+        }
+        button {
+            padding: 0.75rem;
+            background: #1d3557;
+            color: white;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #457b9d;
+        }
+        p {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+        a {
+            color: #1d3557;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .flashes {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .flashes li {
+            
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .alert-success {
+            background-color: #2ecc71;
+            color: white;
+            background-color: #ece928;
+            color: rgb(0, 0, 0);
+        }
+        .alert-error {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .alert-info {
+            background-color: #189599; /* Light blue for logout message */
+            color: white;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <script>
+        // Automatically hide flash messages after 3 seconds
+        window.onload = function() {
+            setTimeout(function() {
+                const flashMessages = document.querySelectorAll('.flashes li');
+                flashMessages.forEach(message => {
+                    message.style.transition = "opacity 0.5s ease-out";
+                    message.style.opacity = 0;
+                    setTimeout(() => message.remove(), 500);
+                });
+            }, 3000);
+        };
+    </script>
+</head>
+<body>
+    <div class="card">
+        <h2>Login</h2>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="alert alert-{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/login">
+            <label for="username">Username</label>
+            <input type="text" name="username" placeholder="Enter your username" required>
+            <label for="password">Password</label>
+            <input type="password" name="password" placeholder="Enter your password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="/signup">Sign up</a></p>
+    </div>
+</body>
+</html>

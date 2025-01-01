@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #dd62cd, #a861c4);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: slideIn 0.8s ease-in-out;
+        }
+        h2 {
+            font-size: 1.8rem;
+            color: #5c7b95;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #96b5cc;
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            text-align: left;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            padding: 0.75rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #96b5cc;
+            outline: none;
+        }
+        .flashes {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .flashes li {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .alert-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .alert-error {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .alert-info {
+            background-color: #3498db;
+            color: white;
+        }
+        button {
+            padding: 0.75rem;
+            background: #55a6e4;
+            color: white;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #5c7b95;
+        }
+        .alternate-action {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+        a {
+            color: #5c7b95;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .message {
+            color: red;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+   <script>
+    // Automatically hide flash messages after 3 seconds
+    window.onload = function() {
+        setTimeout(function() {
+            const flashMessages = document.querySelectorAll('.flashes li');
+            flashMessages.forEach(message => {
+                message.style.transition = "opacity 0.5s ease-out";
+                message.style.opacity = 0;
+                setTimeout(() => message.remove(), 500);
+            });
+        }, 3000);
+    };
+</script>
+</head>
+<div class="card">
+    <h2>Create Account</h2>
+    {% if message %}
+    <p class="message">{{ message }}</p>
+    {% endif %}
+    <form method="POST" action="/signup">
+        <label for="username">Username</label>
+        <input type="text" name="username" placeholder="Enter your username" required>
+        <label for="password">Password</label>
+        <input type="password" name="password" placeholder="Create a strong password" required>
+        <label for="email">Email</label>
+        <input type="email" name="email" placeholder="Enter your email" required>
+        <button type="submit">Sign Up</button>
+    </form>
+    
+    <div class="alternate-action">
+        <p>Already registered? <a href="/login">Log in here</a></p>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul class="flashes">
+            {% for category, message in messages %}
+                <li class="alert alert-{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+</div>
+</body>
+</html>
