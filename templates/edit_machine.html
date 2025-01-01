@@ -176,10 +176,8 @@
             <input type="number" id="warranty_period" name="warranty_period" value="{{ machine[6] }}" required><br>
 
             <label for="status">Status:</label>
-            <select id="status" name="status" required>
-                <option value="Available" {% if machine[7] == 'Available' %} selected {% endif %}>Available</option>
-                <option value="Not available" {% if machine[7] == 'Not available' %} selected {% endif %}>Not available</option>
-            </select><br>
+            <!-- Status is fixed to 'Available' for both add and edit -->
+            <input type="text" id="status" name="status" value="{{ machine[7] }}" readonly><br>
 
             <button type="submit">Update Machine</button>
         </form>

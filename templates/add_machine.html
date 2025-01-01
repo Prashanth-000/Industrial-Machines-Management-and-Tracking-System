@@ -177,10 +177,8 @@
             <input type="number" id="warranty_period" name="warranty_period" required><br>
 
             <label for="status">Status:</label>
-            <select id="status" name="status" required>
-                <option value="Available">Available</option>
-                <option value="Not available">Not available</option>
-            </select><br>
+            <!-- Status is fixed to 'Available' for both add and edit -->
+            <input type="text" id="status" name="status" value="Available" readonly><br>
 
             <button type="submit">Add Machine</button>
         </form>

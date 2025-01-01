@@ -120,8 +120,10 @@ def add_machine():
         manufacturer = request.form['manufacturer']
         model_number = request.form['model_number']
         warranty_period = request.form['warranty_period']
-        status = request.form['status']
         
+        # Status is always set to 'Available' for new machines
+        status = 'Available'
+
         cursor = db.cursor()
         cursor.execute("INSERT INTO machines (name, type, installation_date, manufacturer, model_number, warranty_period, status) VALUES (%s, %s, %s, %s, %s, %s, %s)", 
                         (name, type_, installation_date, manufacturer, model_number, warranty_period, status))  # Insert new machine
@@ -147,7 +149,8 @@ def edit_machine(machine_id):
         manufacturer = request.form['manufacturer']
         model_number = request.form['model_number']
         warranty_period = request.form['warranty_period']
-        status = request.form['status']
+        # Keep the status as 'Available' to prevent user modification
+        status = "Available"  # Status is not allowed to be modified by users
         
         cursor = db.cursor()
         cursor.execute("UPDATE machines SET name = %s, type = %s, installation_date = %s, manufacturer = %s, model_number = %s, warranty_period = %s, status = %s WHERE machine_id = %s", 
@@ -172,11 +175,23 @@ def delete_machine(machine_id):
         return redirect(url_for('login'))
 
     cursor = db.cursor()
-    cursor.execute("DELETE FROM machines WHERE machine_id = %s", (machine_id,))  # Delete the machine by ID
-    db.commit()  # Commit the transaction
+    cursor.execute("SELECT status FROM machines WHERE machine_id = %s", (machine_id,))
+    machine = cursor.fetchone()
 
-    flash("Machine deleted successfully!", 'success')  # Show success message
-    return redirect('/machines')  # Redirect back to the machines page
+    if machine is None:
+        flash('Machine not found.', 'error')
+        return redirect('/machines')
+
+    # Only delete the machine if it is available
+    if machine[0] == 'Available':
+        cursor.execute("DELETE FROM machines WHERE machine_id = %s", (machine_id,))
+        db.commit()  # Commit the transaction
+        flash("Machine deleted successfully!", 'success')
+    else:
+        flash("Cannot delete machine. It is not available.", 'error')
+
+    return redirect('/machines')
+
 
 # Route to display all employees
 @app.route('/employees', methods=['GET'])
@@ -211,7 +226,7 @@ def add_employee():
         email = request.form['email']
         address = request.form['address']
         date_of_hire = request.form['date_of_hire']
-        status = request.form['status']
+        status = "Active"  # Default status is always Active
 
         cursor = db.cursor()
         cursor.execute("""
@@ -246,7 +261,7 @@ def edit_employee(employee_id):
         email = request.form['email']
         address = request.form['address']
         date_of_hire = request.form['date_of_hire']
-        status = request.form['status']
+        status = employee[6]  # Keep the existing status, don't allow modification
 
         cursor.execute("""
             UPDATE employees

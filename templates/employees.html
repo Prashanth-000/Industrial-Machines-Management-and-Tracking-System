@@ -140,6 +140,12 @@
             transform: translateY(-3px);
         }
 
+        /* Disabled Button Styling */
+        .disabled-btn {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
         /* Confirmation Dialog */
         #confirmation-dialog {
             display: none;
@@ -228,7 +234,12 @@
                             <td>{{ employee[6] }}</td>
                             <td>
                                 <a href="/edit_employee/{{ employee[0] }}" class="action-btn edit">Edit</a>
-                                <a href="#" class="action-btn delete" onclick="confirmDelete({{ employee[0] }}); return false;">Delete</a>
+                                <!-- Only enable delete button if status is Active -->
+                                {% if employee[6] == 'Active' %}
+                                    <a href="#" class="action-btn delete" onclick="confirmDelete({{ employee[0] }}); return false;">Delete</a>
+                                {% else %}
+                                <span style="color: gray; cursor: not-allowed;">Delete</span>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}

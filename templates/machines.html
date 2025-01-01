@@ -140,6 +140,13 @@
             transform: translateY(-3px); /* Slight lift effect */
         }
 
+        /* Disabled/Delete Blocked Button */
+        .action-btn.delete.blocked {
+            background-color: #BDC3C7; /* Gray for disabled state */
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
         /* Confirmation Dialog */
         #confirmation-dialog {
             display: none;
@@ -231,8 +238,12 @@
                             <!-- Edit Button -->
                             <a href="/edit_machine/{{ machine[0] }}" class="action-btn edit">Edit</a>
 
-                            <!-- Delete Button -->
-                            <a href="#" class="action-btn delete" onclick="confirmDelete({{ machine[0] }})">Delete</a>
+                            <!-- Delete Button (Visible only for available machines) -->
+                            {% if machine[7] == 'Available' %}
+                                <a href="#" class="action-btn delete" onclick="confirmDelete({{ machine[0] }})">Delete</a>
+                            {% else %}
+                            <span style="color: gray; cursor: not-allowed;">Delete</span>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

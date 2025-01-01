@@ -170,10 +170,10 @@
             <label for="date_of_hire">Date of Hire:</label>
             <input type="date" name="date_of_hire" id="date_of_hire" required><br>
 
+            <!-- Status is fixed as Active and cannot be changed -->
             <label for="status">Status:</label>
-            <select name="status" id="status" required>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
+            <select name="status" id="status" disabled>
+                <option value="Active" selected>Active</option>
             </select><br>
 
             <button type="submit">Add Employee</button>

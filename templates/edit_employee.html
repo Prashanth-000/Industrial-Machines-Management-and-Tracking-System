@@ -150,7 +150,7 @@
         <h1>Edit Employee</h1>
 
         <!-- Flash messages for success or error -->
-        
+  
 
         <!-- Form to edit employee -->
         <form action="/edit_employee/{{ employee[0] }}" method="POST">
@@ -169,8 +169,9 @@
             <label for="date_of_hire">Date of Hire:</label>
             <input type="date" name="date_of_hire" id="date_of_hire" value="{{ employee[5] }}" required><br>
 
+            <!-- Status is fixed as Active and cannot be changed -->
             <label for="status">Status:</label>
-            <select name="status" id="status" required>
+            <select name="status" id="status" disabled>
                 <option value="Active" {% if employee[6] == 'Active' %}selected{% endif %}>Active</option>
                 <option value="Inactive" {% if employee[6] == 'Inactive' %}selected{% endif %}>Inactive</option>
             </select><br>
