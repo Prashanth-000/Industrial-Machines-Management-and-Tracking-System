@@ -426,7 +426,113 @@ def delete_workorder(work_order_id):
         flash("Work order not found.", 'error')
 
     return redirect('/workorders')
+# Viewing maintenance schedules
+@app.route('/maintenance', methods=['GET'])
+def maintenance():
+    if 'logged_in' not in session:
+        flash('Please log in to view maintenance schedules.', 'error')
+        return redirect(url_for('login'))
 
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT ms.schedule_id, m.name AS machine_name, ms.scheduled_date, ms.maintenance_type,
+               ms.cost, ms.status
+        FROM maintenance_schedules ms
+        JOIN machines m ON ms.machine_id = m.machine_id
+    """)
+    maintenances = cursor.fetchall()
+
+    return render_template('maintenance.html', maintenances=maintenances)
+
+# Adding new maintenance schedule
+@app.route('/add_maintenance', methods=['GET', 'POST'])
+def add_maintenance():
+    if 'logged_in' not in session:
+        flash('Please log in to add a maintenance schedule.', 'error')
+        return redirect(url_for('login'))
+
+    cursor = db.cursor()
+
+    if request.method == 'POST':
+        # Get form data
+        machine_id = request.form['machine_id']
+        scheduled_date = request.form['scheduled_date']
+        maintenance_type = request.form['maintenance_type']
+        cost = request.form['cost']
+
+        # Insert new maintenance schedule into the database
+        cursor.execute("""
+            INSERT INTO maintenance_schedules (machine_id, scheduled_date, maintenance_type, cost, status)
+            VALUES (%s, %s, %s, %s, 'Scheduled')
+        """, (machine_id, scheduled_date, maintenance_type, cost))
+        db.commit()
+
+        flash('Maintenance schedule added successfully!', 'success')
+        return redirect('/maintenance')
+
+    # Fetch available machines for selection
+    cursor.execute("SELECT machine_id, name FROM machines")
+    machines = cursor.fetchall()
+
+    return render_template('add_maintenance.html', machines=machines)
+
+# Updating maintenance schedule
+@app.route('/edit_maintenance/<int:schedule_id>', methods=['GET', 'POST'])
+def edit_maintenance(schedule_id):
+    if 'logged_in' not in session:
+        flash('Please log in to edit a maintenance schedule.', 'error')
+        return redirect(url_for('login'))
+
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT ms.*, m.name AS machine_name
+        FROM maintenance_schedules ms
+        JOIN machines m ON ms.machine_id = m.machine_id
+        WHERE ms.schedule_id = %s
+    """, (schedule_id,))
+    maintenance = cursor.fetchone()
+
+    if not maintenance:
+        flash('Maintenance schedule not found.', 'error')
+        return redirect('/maintenance')
+
+    if request.method == 'POST':
+        # Update maintenance schedule
+        machine_id = request.form['machine_id']
+        scheduled_date = request.form['scheduled_date']
+        maintenance_type = request.form['maintenance_type']
+        cost = request.form['cost']
+        status = request.form['status']
+
+        cursor.execute("""
+            UPDATE maintenance_schedules
+            SET machine_id = %s, scheduled_date = %s, maintenance_type = %s, cost = %s, status = %s
+            WHERE schedule_id = %s
+        """, (machine_id, scheduled_date, maintenance_type, cost, status, schedule_id))
+        db.commit()
+
+        flash('Maintenance schedule updated successfully!', 'success')
+        return redirect('/maintenance')
+
+    # Fetch available machines for selection
+    cursor.execute("SELECT machine_id, name FROM machines")
+    machines = cursor.fetchall()
+
+    return render_template('edit_maintenance.html', maintenance=maintenance, machines=machines)
+
+# Deleting maintenance schedule
+@app.route('/delete_maintenance/<int:schedule_id>', methods=['GET'])
+def delete_maintenance(schedule_id):
+    if 'logged_in' not in session:
+        flash('Please log in to delete a maintenance schedule.', 'error')
+        return redirect(url_for('login'))
+
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM maintenance_schedules WHERE schedule_id = %s", (schedule_id,))
+    db.commit()
+
+    flash('Maintenance schedule deleted successfully!', 'success')
+    return redirect('/maintenance')
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -15,7 +15,8 @@
         /* Body styling */
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #bfd8df, #99adcc); /* Light gradient background */
+            background: url('/static/Images/home.jpg') no-repeat center center fixed;
+            background-size: cover; /* Ensures the image covers the entire background */
             color: #333;
             height: 100vh;
             display: flex;
@@ -23,6 +24,7 @@
             align-items: center;
             justify-content: flex-start;
             overflow: hidden;
+            padding-top: 80px; /* Matches the height of the fixed navbar to avoid overlap */
         }
 
         /* Top Navbar */
@@ -42,10 +44,10 @@
         }
 
         .navbar .title {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: bold;
             text-transform: uppercase;
-            color: #ffd700; /* Gold accent color */
+            color: #e9e1b3; /* Gold accent color */
         }
 
         .navbar a {
@@ -60,7 +62,7 @@
         }
 
         .navbar a:hover {
-            background-color: #ffd700; /* Gold for hover */
+            background-color: #e73636; /* Gold for hover */
             color: #004080;
         }
 
@@ -75,10 +77,10 @@
             margin-top: 80px; /* Space for fixed navbar */
             text-align: center;
             padding: 50px 60px;
-            background: rgba(255, 255, 255, 0.9); /* Slightly opaque background */
-            border-radius: 20px;
+            background: linear-gradient(135deg, #3e8ee9, #e98a4b);
             width: 85%;
             max-width: 1100px;
+            border-radius: 15px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             animation: fadeIn 1s ease-in-out;
         }
@@ -102,8 +104,8 @@
         /* Navigation buttons */
         .button-container a {
             display: block;
-            background-color: #3498db; /* Bright blue for buttons */
-            color: white;
+            background-color: #dbd834; /* Bright blue for buttons */
+            color: rgb(58, 11, 11);
             padding: 20px 35px;
             border-radius: 50px;
             font-size: 1.2rem;
@@ -116,12 +118,14 @@
         }
 
         .button-container a:hover {
-            background-color: #2980b9; /* Darker blue for hover effect */
+            background-color: #e4a343; /* Darker blue for hover effect */
+            color: aliceblue;
             transform: translateY(-8px); /* Lift effect */
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
         }
         .logout-btn{
             background-color: #59819c;
+            
         }
 
         /* Fade-in animation */
@@ -233,7 +237,7 @@
 </head>
 <body>
     <div class="navbar">
-        <div class="title">Industrial Machine Management</div>
+        <div class="title">Industrial Machines Tracking System</div>
         <a href="/logout" class="logout-btn">Logout</a>
     </div>
 
@@ -244,6 +248,8 @@
         <h1>Welcome, back!</h1> <!-- Fixed welcome message -->
 
         <p>Manage your industry. Explore the system below.</p>
+        
+
 
         <div class="button-container">
             <a href="/machines" class="active">Machines</a>

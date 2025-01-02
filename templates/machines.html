@@ -16,6 +16,8 @@
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #bfd8df, #99adcc); /* Light gradient background */
+            background: url('/static/Images/machine.jpg') no-repeat center center fixed;
+            background-size: cover; /* Ensures the image covers the entire background */
             margin: 0;
             padding: 0;
         }
@@ -64,15 +66,18 @@
             margin-left: auto;
             margin-right: auto; /* Center the table container */
             flex-direction: column; /* Stack the content */
+            
         }
 
-        .add-machine-btn {
+        .add-machine-btn,.maintenance-btn {
             align-self: flex-start;
             background-color: #28a745; /* Green for Add button */
             color: white;
             padding: 10px 20px;
             font-size: 1rem;
             font-weight: bold;
+            width: 180px;
+            text-align: center;
             border-radius: 5px;
             text-decoration: none;
             transition: background-color 0.3s ease, transform 0.3s ease;
@@ -82,6 +87,21 @@
         .add-machine-btn:hover {
             background-color: #218838;
             transform: translateY(-3px); /* Slight lift effect */
+        }
+        .maintenance-btn {
+            margin-left: 10px; /* Space between buttons */
+            background-color: #f39c12; /* Orange for Maintenance */
+        }
+        .maintenance-btn:hover {
+            background-color: #e67e22; /* Darker orange on hover */
+            transform: translateY(-3px); /* Slight lift effect */
+        }
+        #buttons2 {
+            display: flex;
+            justify-content: space-between;
+            justify-content: start;
+            
+           
         }
 
         table {
@@ -208,7 +228,10 @@
 
     <!-- Add New Machine Button -->
     <div class="table-container">
+        <div id="buttons2">
         <a href="/add_machine" class="add-machine-btn">Add New Machine</a>
+        <a href="/maintenance" class="maintenance-btn">Maintenance</a>
+        </div>
 
         <!-- Machine Table -->
         <table>

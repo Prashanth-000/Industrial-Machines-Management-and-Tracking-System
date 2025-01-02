@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Management</title>
+    <style>
+        /* Reset defaults */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #bfd8df, #99adcc);
+            background: url('/static/Images/maintenance.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* Navbar styling */
+        .navbar {
+            background-color: #004080;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar a {
+            color: #fff;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-right: 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #ffd700;
+            color: #004080;
+        }
+
+        .navbar a.active {
+            background-color: #ffd700;
+            color: #004080;
+            font-weight: bold;
+        }
+
+        /* Table Styling */
+        .table-container {
+            width: 95%;
+            margin: 80px auto 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-maintenance-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .add-maintenance-btn:hover {
+            background-color: #218838;
+            transform: translateY(-3px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #004080;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        td {
+            background-color: white;
+        }
+
+        td a {
+            padding: 8px 15px;
+            margin-right: 10px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .action-btn.edit {
+            background-color: #3498db;
+        }
+
+        .action-btn.edit:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+        }
+
+        .action-btn.delete {
+            background-color: #e74c3c;
+        }
+
+        .action-btn.delete:hover {
+            background-color: #c0392b;
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="/" >Home</a>
+        <a href="/machines">Machines</a>
+        <a href="/employees">Employees</a>
+        <a href="/workorders">Work Orders</a>
+        <a href="/maintenance" class="active">Maintenance</a>
+    </div>
+
+    <!-- Add New Maintenance Button -->
+    <div class="table-container">
+        <a href="/add_maintenance" class="add-maintenance-btn">Add New Maintenance</a>
+
+        <!-- Maintenance Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Schedule ID</th>
+                    <th>Machine Name</th>
+                    <th>Scheduled Date</th>
+                    <th>Maintenance Type</th>
+                    <th>Cost</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for maintenance in maintenances %}
+                    <tr>
+                        <td>{{ maintenance[0] }}</td>
+                        <td>{{ maintenance[1] }}</td>
+                        <td>{{ maintenance[2] }}</td>
+                        <td>{{ maintenance[3] }}</td>
+                        <td>{{ maintenance[4] }}</td>
+                        <td>{{ maintenance[5] }}</td>
+                        <td>
+                            <a href="/edit_maintenance/{{ maintenance[0] }}" class="action-btn edit">Edit</a>
+                            <a href="/delete_maintenance/{{ maintenance[0] }}" class="action-btn delete">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

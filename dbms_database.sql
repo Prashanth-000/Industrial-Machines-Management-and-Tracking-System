@@ -46,23 +46,21 @@ VALUES
 CREATE TABLE maintenance_schedules (
     schedule_id INT AUTO_INCREMENT PRIMARY KEY,
     machine_id INT NOT NULL,
-    employee_id INT NOT NULL,
     scheduled_date DATE NOT NULL,
     maintenance_type VARCHAR(100) NOT NULL,
     cost DECIMAL(10, 2),
     status ENUM('Scheduled', 'Completed') NOT NULL,
-    FOREIGN KEY (machine_id) REFERENCES machines(machine_id) ON DELETE CASCADE,
-    FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE
+    FOREIGN KEY (machine_id) REFERENCES machines(machine_id) ON DELETE CASCADE
 );
 
 -- Insert into Maintenance Schedules Table
 INSERT INTO maintenance_schedules (machine_id, employee_id, scheduled_date, maintenance_type, cost, status)
 VALUES 
-    (1, 1, '2024-01-10', 'Oil Change', 150.00, 'Scheduled'),
-    (2, 2, '2024-02-05', 'Brake Inspection', 200.00, 'Scheduled'),
-    (3, 3, '2024-03-15', 'General Maintenance', 100.00, 'Scheduled'),
-    (4, 4, '2024-04-10', 'Belt Replacement', 250.00, 'Completed'),
-    (5, 5, '2024-05-01', 'Filter Cleaning', 80.00, 'Completed');
+    (1, '2024-01-10', 'Oil Change', 150.00, 'Scheduled'),
+    (2, '2024-02-05', 'Brake Inspection', 200.00, 'Scheduled'),
+    (3, '2024-03-15', 'General Maintenance', 100.00, 'Scheduled'),
+    (4,  '2024-04-10', 'Belt Replacement', 250.00, 'Completed'),
+    (5,  '2024-05-01', 'Filter Cleaning', 80.00, 'Completed');
 
 -- Machine Parts Repair Table
 CREATE TABLE machine_parts_repair (

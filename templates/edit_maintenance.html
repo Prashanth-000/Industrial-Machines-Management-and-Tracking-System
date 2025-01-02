@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Maintenance</title>
+    <style>
+        /* Reset defaults */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #bfd8df, #99adcc); /* Light gradient background */
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar styling */
+        .navbar {
+            background-color: #004080; /* Deep blue */
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for elevation */
+        }
+
+        .navbar a {
+            color: #fff;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-right: 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #ffd700; /* Gold for hover */
+            color: #004080;
+        }
+
+        .navbar a.active {
+            background-color: #ffd700; /* Gold for active link */
+            color: #004080;
+            font-weight: bold;
+        }
+
+        /* Container for form */
+        .container {
+            width: 600px; /* Decrease width of the form container */
+            margin: 80px auto 20px; /* Space for the navbar and center alignment */
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.2rem; /* Slightly smaller heading */
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input, select, button {
+            padding: 10px; /* Smaller padding for inputs */
+            margin-bottom: 12px; /* Reduced space between inputs */
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            padding: 10px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Flash message styling */
+        .flashes {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .flashes li {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .alert-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .alert-error {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .alert-info {
+            background-color: #3498db;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="/" >Home</a>
+        <a href="/machines">Machines</a>
+        <a href="/employees">Employees</a>
+        <a href="/workorders">Work Orders</a>
+        <a href="/maintenance" class="active">Maintenance</a>
+    </div>
+
+    <!-- Edit Maintenance Form -->
+    <div class="container">
+        <h1>Edit Maintenance Schedule</h1>
+
+        <!-- Flash messages for success or error -->
+
+        <!-- Form to edit maintenance -->
+        <form action="/edit_maintenance/{{ maintenance[0] }}" method="POST">
+            <label for="machine_id">Machine:</label>
+            <select name="machine_id" id="machine_id" required>
+                {% for machine in machines %}
+                <option value="{{ machine[0] }}" {% if machine[0] == maintenance[1] %}selected{% endif %}>
+                    {{ machine[1] }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label for="scheduled_date">Scheduled Date:</label>
+            <input type="date" name="scheduled_date" id="scheduled_date" value="{{ maintenance[2] }}" required>
+
+            <label for="maintenance_type">Maintenance Type:</label>
+            <input type="text" name="maintenance_type" id="maintenance_type" value="{{ maintenance[3] }}" required>
+
+            <label for="cost">Cost:</label>
+            <input type="number" name="cost" id="cost" step="0.01" value="{{ maintenance[4] }}" required>
+
+            <label for="status">Status:</label>
+            <select name="status" id="status" required>
+                <option value="Scheduled" {% if maintenance[5] == 'Scheduled' %}selected{% endif %}>Scheduled</option>
+                <option value="Completed" {% if maintenance[5] == 'Completed' %}selected{% endif %}>Completed</option>
+            </select>
+
+            <button type="submit">Update Maintenance</button>
+        </form>
+    </div>
+
+</body>
+</html>
