@@ -412,10 +412,10 @@ def delete_workorder(work_order_id):
         employee_id = work_order[1]
         status = work_order[2]
         
-        if status == 'Completed':
-            # Reset the machine and employee status back to available and active respectively
-            cursor.execute("UPDATE machines SET status = 'Available' WHERE machine_id = %s", (machine_id,))
-            cursor.execute("UPDATE employees SET status = 'Active' WHERE employee_id = %s", (employee_id,))
+        # if status == 'Completed':
+        #     # Reset the machine and employee status back to available and active respectively
+        #     cursor.execute("UPDATE machines SET status = 'Available' WHERE machine_id = %s", (machine_id,))
+        #     cursor.execute("UPDATE employees SET status = 'Active' WHERE employee_id = %s", (employee_id,))
         
         # Delete the work order
         cursor.execute("DELETE FROM work_orders WHERE work_order_id = %s", (work_order_id,))
