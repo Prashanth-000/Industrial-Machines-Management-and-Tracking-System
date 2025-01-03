@@ -16,8 +16,6 @@
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #bfd8df, #99adcc);
-            background: url('/static/Images/maintenance.jpg') no-repeat center center fixed;
-            background-size: cover;
         }
 
         /* Navbar styling */
@@ -124,6 +122,48 @@
             transform: translateY(-3px);
         }
 
+    .action-btn.done {
+    background-color: #28a745; /* Green color */
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    margin-right: 10px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+}
+
+.action-btn.done:hover {
+    background-color: #218838; /* Darker green on hover */
+    transform: translateY(-3px); /* Slight lift effect */
+}
+.action-btn.repo {
+    background-color: #b8da25; /* Green color */
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    margin-right: 10px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+}
+
+.action-btn.repo:hover {
+    background-color: #93ad1c; /* Darker green on hover */
+    transform: translateY(-3px); /* Slight lift effect */
+}
+
+
         .action-btn.delete {
             background-color: #e74c3c;
         }
@@ -138,7 +178,7 @@
 
     <!-- Navbar -->
     <div class="navbar">
-        <a href="/" >Home</a>
+        <a href="/">Home</a>
         <a href="/machines">Machines</a>
         <a href="/employees">Employees</a>
         <a href="/workorders">Work Orders</a>
@@ -172,8 +212,15 @@
                         <td>{{ maintenance[4] }}</td>
                         <td>{{ maintenance[5] }}</td>
                         <td>
-                            <a href="/edit_maintenance/{{ maintenance[0] }}" class="action-btn edit">Edit</a>
-                            <a href="/delete_maintenance/{{ maintenance[0] }}" class="action-btn delete">Delete</a>
+                            {% if maintenance[5] == 'Scheduled' %}
+                                <a href="/edit_maintenance/{{ maintenance[0] }}" class="action-btn edit">Edit</a>
+                                <form action="/mark_done/{{ maintenance[0] }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="action-btn done">Done</button>
+                                </form>
+                                <a href="/delete_maintenance/{{ maintenance[0] }}" class="action-btn delete">Delete</a>
+                            {% elif maintenance[5] == 'Completed' %}
+                                <a href="/report/{{ maintenance[0] }}" class="action-btn repo">Report</a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

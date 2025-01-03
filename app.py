@@ -1,5 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, request, redirect, url_for, flash, session
 import pymysql
+import pdfkit
+from flask import make_response, render_template
+from datetime import datetime
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Required for session management
@@ -150,7 +154,7 @@ def edit_machine(machine_id):
         model_number = request.form['model_number']
         warranty_period = request.form['warranty_period']
         # Keep the status as 'Available' to prevent user modification
-        status = "Available"  # Status is not allowed to be modified by users
+        status = request.form['status'] # Status is not allowed to be modified by users
         
         cursor = db.cursor()
         cursor.execute("UPDATE machines SET name = %s, type = %s, installation_date = %s, manufacturer = %s, model_number = %s, warranty_period = %s, status = %s WHERE machine_id = %s", 
@@ -448,77 +452,132 @@ def maintenance():
 @app.route('/add_maintenance', methods=['GET', 'POST'])
 def add_maintenance():
     if 'logged_in' not in session:
-        flash('Please log in to add a maintenance schedule.', 'error')
+        flash('Please log in to add maintenance schedules.', 'error')
         return redirect(url_for('login'))
 
     cursor = db.cursor()
 
+    if request.method == 'GET':
+        # Fetch machine list for the dropdown
+        cursor.execute("SELECT machine_id, name FROM machines")
+        machines = cursor.fetchall()
+        return render_template('add_maintenance.html', machines=machines)
+
     if request.method == 'POST':
-        # Get form data
         machine_id = request.form['machine_id']
         scheduled_date = request.form['scheduled_date']
         maintenance_type = request.form['maintenance_type']
-        cost = request.form['cost']
+        expenses = zip(request.form.getlist('expense_name[]'), request.form.getlist('expense_cost[]'),
+                       request.form.getlist('expense_notes[]'))
 
-        # Insert new maintenance schedule into the database
+        # Insert maintenance schedule
         cursor.execute("""
             INSERT INTO maintenance_schedules (machine_id, scheduled_date, maintenance_type, cost, status)
-            VALUES (%s, %s, %s, %s, 'Scheduled')
-        """, (machine_id, scheduled_date, maintenance_type, cost))
+            VALUES (%s, %s, %s, %s, %s)
+        """, (machine_id, scheduled_date, maintenance_type, 0, 'Scheduled'))
+        schedule_id = cursor.lastrowid
+
+        # Insert expenses into the temporary table
+        for expense_name, expense_cost, expense_notes in expenses:
+            cursor.execute("""
+                INSERT INTO expenses (maintenance_schedule_id, expense_name, cost, notes)
+                VALUES (%s, %s, %s, %s)
+            """, (schedule_id, expense_name, expense_cost, expense_notes))
+
+        # Update the cost in the maintenance_schedules table
+        cursor.execute("""
+            UPDATE maintenance_schedules
+            SET cost = (SELECT SUM(cost) FROM expenses WHERE maintenance_schedule_id = %s)
+            WHERE schedule_id = %s
+        """, (schedule_id, schedule_id))
+
         db.commit()
-
         flash('Maintenance schedule added successfully!', 'success')
-        return redirect('/maintenance')
-
-    # Fetch available machines for selection
-    cursor.execute("SELECT machine_id, name FROM machines")
-    machines = cursor.fetchall()
-
-    return render_template('add_maintenance.html', machines=machines)
-
-# Updating maintenance schedule
-@app.route('/edit_maintenance/<int:schedule_id>', methods=['GET', 'POST'])
-def edit_maintenance(schedule_id):
+        return redirect(url_for('maintenance'))
+    
+    #editing maintanace schedules
+@app.route('/edit_maintenance/<int:maintenance_id>', methods=['GET', 'POST'])
+def edit_maintenance(maintenance_id):
     if 'logged_in' not in session:
-        flash('Please log in to edit a maintenance schedule.', 'error')
+        flash('Please log in to edit maintenance schedules.', 'error')
         return redirect(url_for('login'))
 
     cursor = db.cursor()
-    cursor.execute("""
-        SELECT ms.*, m.name AS machine_name
-        FROM maintenance_schedules ms
-        JOIN machines m ON ms.machine_id = m.machine_id
-        WHERE ms.schedule_id = %s
-    """, (schedule_id,))
-    maintenance = cursor.fetchone()
 
-    if not maintenance:
-        flash('Maintenance schedule not found.', 'error')
-        return redirect('/maintenance')
+    if request.method == 'GET':
+        # Fetch machine list for the dropdown
+        cursor.execute("SELECT machine_id, name FROM machines")
+        machines = cursor.fetchall()
+
+        # Fetch the selected maintenance schedule
+        cursor.execute("SELECT * FROM maintenance_schedules WHERE schedule_id = %s", (maintenance_id,))
+        maintenance = cursor.fetchone()
+
+        # Fetch expenses associated with the maintenance schedule
+        cursor.execute("SELECT temp_expense_id, expense_name, cost, notes FROM expenses WHERE maintenance_schedule_id = %s", (maintenance_id,))
+        expenses = cursor.fetchall()
+
+        return render_template('edit_maintenance.html', machines=machines, maintenance=maintenance, expenses=expenses)
 
     if request.method == 'POST':
-        # Update maintenance schedule
         machine_id = request.form['machine_id']
         scheduled_date = request.form['scheduled_date']
         maintenance_type = request.form['maintenance_type']
-        cost = request.form['cost']
-        status = request.form['status']
 
+        # "Status" remains frozen at "Scheduled"
+        status = 'Scheduled'
+
+        # Update the maintenance schedule
         cursor.execute("""
             UPDATE maintenance_schedules
-            SET machine_id = %s, scheduled_date = %s, maintenance_type = %s, cost = %s, status = %s
+            SET machine_id = %s, scheduled_date = %s, maintenance_type = %s, status = %s
             WHERE schedule_id = %s
-        """, (machine_id, scheduled_date, maintenance_type, cost, status, schedule_id))
+        """, (machine_id, scheduled_date, maintenance_type, status, maintenance_id))
+
+        # Handle deletions for marked expenses
+        delete_expense_ids = request.form.getlist('delete_expense[]')
+        if delete_expense_ids:
+            cursor.execute("""
+                DELETE FROM expenses
+                WHERE temp_expense_id IN (%s)
+            """ % ','.join(['%s'] * len(delete_expense_ids)), tuple(delete_expense_ids))
+
+        # Get the updated data for the expenses
+        expense_ids = request.form.getlist('expense_id[]')
+        expense_names = request.form.getlist('expense_name[]')
+        expense_costs = request.form.getlist('expense_cost[]')
+        expense_notes = request.form.getlist('expense_notes[]')
+
+        # Update the existing expenses
+        for i in range(len(expense_ids)):
+            cursor.execute("""
+                UPDATE expenses
+                SET expense_name = %s, cost = %s, notes = %s
+                WHERE temp_expense_id = %s
+            """, (expense_names[i], expense_costs[i], expense_notes[i], expense_ids[i]))
+
+        # Add any new expenses that were submitted
+        new_expense_names = request.form.getlist('new_expense_name[]')
+        new_expense_costs = request.form.getlist('new_expense_cost[]')
+        new_expense_notes = request.form.getlist('new_expense_notes[]')
+
+        for i in range(len(new_expense_names)):
+            if new_expense_names[i].strip() and new_expense_costs[i]:  # Ignore empty rows
+                cursor.execute("""
+                    INSERT INTO expenses (maintenance_schedule_id, expense_name, cost, notes)
+                    VALUES (%s, %s, %s, %s)
+                """, (maintenance_id, new_expense_names[i], new_expense_costs[i], new_expense_notes[i]))
+
+        # Recalculate the total cost for the maintenance schedule
+        cursor.execute("""
+            UPDATE maintenance_schedules
+            SET cost = (SELECT SUM(cost) FROM expenses WHERE maintenance_schedule_id = %s)
+            WHERE schedule_id = %s
+        """, (maintenance_id, maintenance_id))
+
         db.commit()
-
         flash('Maintenance schedule updated successfully!', 'success')
-        return redirect('/maintenance')
-
-    # Fetch available machines for selection
-    cursor.execute("SELECT machine_id, name FROM machines")
-    machines = cursor.fetchall()
-
-    return render_template('edit_maintenance.html', maintenance=maintenance, machines=machines)
+        return redirect(url_for('maintenance'))
 
 # Deleting maintenance schedule
 @app.route('/delete_maintenance/<int:schedule_id>', methods=['GET'])
@@ -533,6 +592,90 @@ def delete_maintenance(schedule_id):
 
     flash('Maintenance schedule deleted successfully!', 'success')
     return redirect('/maintenance')
+
+#marking maintenance schedule as completed
+@app.route('/mark_done/<int:schedule_id>', methods=['POST'])
+def mark_done(schedule_id):
+    if 'logged_in' not in session:
+        flash('Please log in to mark the maintenance as done.', 'error')
+        return redirect(url_for('login'))
+    
+    cursor = db.cursor()
+    cursor.execute("""
+        UPDATE maintenance_schedules
+        SET status = 'Completed'
+        WHERE schedule_id = %s;
+    """, (schedule_id,))
+    db.commit()
+    
+    flash('Maintenance marked as done successfully!', 'success')
+    return redirect(url_for('maintenance'))  # Redirect back to the maintenance page
+
+
+#View maintenance report
+@app.route('/report/<int:schedule_id>', methods=['GET'])
+def show_report(schedule_id):
+    # Check if user is logged in
+    if 'logged_in' not in session:
+        flash('Please log in to view the report.', 'error')
+        return redirect(url_for('login'))
+
+    # Fetch the maintenance data from the database
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT ms.schedule_id, m.name AS machine_name, ms.scheduled_date, ms.maintenance_type, ms.cost, ms.status
+        FROM maintenance_schedules ms
+        JOIN machines m ON ms.machine_id = m.machine_id
+        WHERE ms.schedule_id = %s;
+    """, (schedule_id,))
+    maintenances = cursor.fetchall()
+    
+    # Current date for the report
+    current_date = datetime.now().strftime("%B %d, %Y")
+
+    # Render the report HTML page
+    return render_template('report.html', current_date=current_date, maintenances=maintenances, schedule_id=schedule_id)
+
+# #download report
+# @app.route('/download_report/<int:schedule_id>', methods=['GET'])
+# def download_report(schedule_id):
+#     # Check if user is logged in
+#     if 'logged_in' not in session:
+#         flash('Please log in to download the report.', 'error')
+#         return redirect(url_for('login'))
+
+#     # Fetch the maintenance data from the database
+#     cursor = db.cursor()
+#     cursor.execute("""
+#         SELECT ms.schedule_id, m.name AS machine_name, ms.scheduled_date, ms.maintenance_type, ms.cost, ms.status
+#         FROM maintenance_schedules ms
+#         JOIN machines m ON ms.machine_id = m.machine_id
+#         WHERE ms.schedule_id = %s;
+#     """, (schedule_id,))
+#     maintenances = cursor.fetchall()
+    
+#     # Current date for the report
+#     current_date = datetime.now().strftime("%B %d, %Y")
+
+#     # Render the report HTML (this will render the same template you used for the report)
+#     html_content = render_template('report.html', current_date=current_date, maintenances=maintenances, schedule_id=schedule_id)
+
+#     # Set the path to wkhtmltopdf executable
+#     path_to_wkhtmltopdf = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"  # Adjust path if needed
+
+#     # Configure pdfkit to use this path
+#     config = pdfkit.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
+
+#     # Generate the PDF from the HTML string using pdfkit
+#     pdf = pdfkit.from_string(html_content, False, configuration=config)
+
+#     # Prepare the response with the PDF file
+#     response = make_response(pdf)
+#     response.headers['Content-Type'] = 'application/pdf'
+#     response.headers['Content-Disposition'] = f'attachment; filename=maintenance_report_{schedule_id}.pdf'
+
+#     return response
+
 
 if __name__ == '__main__':
     app.run(debug=True)

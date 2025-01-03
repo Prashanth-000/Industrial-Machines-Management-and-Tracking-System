@@ -62,25 +62,15 @@ VALUES
     (4,  '2024-04-10', 'Belt Replacement', 250.00, 'Completed'),
     (5,  '2024-05-01', 'Filter Cleaning', 80.00, 'Completed');
 
--- Machine Parts Repair Table
-CREATE TABLE machine_parts_repair (
-    repair_id INT AUTO_INCREMENT PRIMARY KEY,
+
+CREATE TABLE expenses (
+    temp_expense_id INT AUTO_INCREMENT PRIMARY KEY,
     maintenance_schedule_id INT NOT NULL,
-    part_name VARCHAR(255) NOT NULL,
-    repair_date DATE,
-    vendor_name VARCHAR(255),
-    repair_notes TEXT,
+    expense_name VARCHAR(255) NOT NULL,
+    cost DECIMAL(10, 2),
+    notes TEXT,
     FOREIGN KEY (maintenance_schedule_id) REFERENCES maintenance_schedules(schedule_id) ON DELETE CASCADE
 );
-
--- Insert into Machine Parts Repair Table
-INSERT INTO machine_parts_repair (maintenance_schedule_id, part_name, repair_date, vendor_name)
-VALUES 
-    (1, 'Control Panel', '2024-01-12', 'Tech Supplies Co.'),
-    (2, 'Brake Pad', '2024-02-07', 'Machinery Parts Inc.'),
-    (3, 'Drill Bit', '2024-03-17', 'Industrial Tools Ltd.'),
-    (4, 'Grinding Wheel', '2024-04-12', 'Precision Tools Pvt.'),
-    (5, 'Filter Cartridge', '2024-05-03', 'Filtration Experts LLC');
 
 -- Work Orders Table
 CREATE TABLE work_orders (
@@ -104,24 +94,6 @@ VALUES
     (4, 4, '2024-04-01', '2024-04-08', 'Replace worn-out grinding wheel.', 'Completed'),
     (5, 5, '2024-05-01', '2024-05-05', 'Service filters and replace gaskets.', 'Pending');
 
--- Machine Usage Logs Table
-CREATE TABLE machine_usage_logs (
-    log_id INT AUTO_INCREMENT PRIMARY KEY,
-    machine_id INT NOT NULL,
-    usage_date DATE NOT NULL,
-    duration_in_hours INT NOT NULL,
-    purpose VARCHAR(255) NOT NULL,
-    FOREIGN KEY (machine_id) REFERENCES machines(machine_id) ON DELETE CASCADE
-);
-
--- Insert into Machine Usage Logs Table
-INSERT INTO machine_usage_logs (machine_id, usage_date, duration_in_hours, purpose)
-VALUES 
-    (1, '2024-01-03', 5, 'Machining prototype parts.'),
-    (2, '2024-01-10', 8, 'Fabricating custom components.'),
-    (3, '2024-01-15', 3, 'Drilling holes for assembly line.'),
-    (4, '2024-01-18', 6, 'Grinding precision tools.'),
-    (5, '2024-01-20', 4, '3D printing demonstration models.');
 
 -- Admins Table
 CREATE TABLE admins (
@@ -136,3 +108,45 @@ INSERT INTO admins (username, password, email)
 VALUES 
     ('admin1', 'password123', 'admin1@example.com'),
     ('admin2', 'securepass456', 'admin2@example.com');
+
+
+DELIMITER $$
+
+CREATE TRIGGER after_work_order_insert
+AFTER INSERT ON work_orders
+FOR EACH ROW
+BEGIN
+    -- Set the machine state to 'Not available'
+    UPDATE machines 
+    SET status = 'Not available'
+    WHERE machine_id = NEW.machine_id;
+
+    -- Set the employee state to 'Inactive'
+    UPDATE employees 
+    SET status = 'Inactive'
+    WHERE employee_id = NEW.employee_id;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE TRIGGER after_work_order_update
+AFTER UPDATE ON work_orders
+FOR EACH ROW
+BEGIN
+    IF NEW.status = 'Completed' THEN
+        -- Set the machine state back to 'Available'
+        UPDATE machines 
+        SET status = 'Available'
+        WHERE machine_id = NEW.machine_id;
+
+        -- Set the employee state back to 'Active'
+        UPDATE employees 
+        SET status = 'Active'
+        WHERE employee_id = NEW.employee_id;
+    END IF;
+END$$
+
+DELIMITER ;

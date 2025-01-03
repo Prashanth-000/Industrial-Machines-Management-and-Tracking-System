@@ -15,18 +15,18 @@
         /* Body styling */
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #bfd8df, #99adcc); /* Light gradient background */
+            background: linear-gradient(135deg, #bfd8df, #99adcc);
             margin: 0;
             padding: 0;
         }
 
         /* Navbar styling */
         .navbar {
-            background-color: #004080; /* Deep blue */
+            background-color: #004080;
             display: flex;
             align-items: center;
             padding: 10px 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for elevation */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .navbar a {
@@ -41,28 +41,28 @@
         }
 
         .navbar a:hover {
-            background-color: #ffd700; /* Gold for hover */
+            background-color: #ffd700;
             color: #004080;
         }
 
         .navbar a.active {
-            background-color: #ffd700; /* Gold for active link */
+            background-color: #ffd700;
             color: #004080;
             font-weight: bold;
         }
 
         /* Container for form */
         .container {
-            width: 600px; /* Decrease width of the form container */
-            margin: 80px auto 20px; /* Space for the navbar and center alignment */
+            width: 850px;
+            margin: 80px auto 20px;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
-            font-size: 2.2rem; /* Slightly smaller heading */
+            font-size: 2.2rem;
             color: #333;
             margin-bottom: 20px;
             font-weight: bold;
@@ -79,15 +79,15 @@
             color: #333;
         }
 
-        input, select, button {
-            padding: 10px; /* Smaller padding for inputs */
-            margin-bottom: 12px; /* Reduced space between inputs */
+        input, select, textarea, button {
+            padding: 10px;
+            margin-bottom: 12px;
             border-radius: 5px;
             border: 1px solid #ccc;
             font-size: 1rem;
         }
 
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             border-color: #3498db;
             outline: none;
         }
@@ -105,32 +105,45 @@
             background-color: #2980b9;
         }
 
-        /* Flash message styling */
-        .flashes {
-            list-style-type: none;
-            padding: 0;
-            margin-bottom: 20px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
 
-        .flashes li {
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
             padding: 10px;
-            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .add-expense-btn, .delete-btn {
+            display: inline-block;
+            padding: 8px 15px;
+            border: none;
             border-radius: 5px;
+            cursor: pointer;
         }
 
-        .alert-success {
-            background-color: #2ecc71;
+        .add-expense-btn {
+            background: #28a745;
             color: white;
         }
 
-        .alert-error {
-            background-color: #e74c3c;
+        .add-expense-btn:hover {
+            background: #218838;
+        }
+
+        .delete-btn {
+            background-color: red;
             color: white;
         }
 
-        .alert-info {
-            background-color: #3498db;
-            color: white;
+        .delete-btn:hover {
+            background-color: darkred;
         }
     </style>
 </head>
@@ -148,10 +161,6 @@
     <!-- Edit Maintenance Form -->
     <div class="container">
         <h1>Edit Maintenance Schedule</h1>
-
-        <!-- Flash messages for success or error -->
-
-        <!-- Form to edit maintenance -->
         <form action="/edit_maintenance/{{ maintenance[0] }}" method="POST">
             <label for="machine_id">Machine:</label>
             <select name="machine_id" id="machine_id" required>
@@ -168,18 +177,69 @@
             <label for="maintenance_type">Maintenance Type:</label>
             <input type="text" name="maintenance_type" id="maintenance_type" value="{{ maintenance[3] }}" required>
 
-            <label for="cost">Cost:</label>
-            <input type="number" name="cost" id="cost" step="0.01" value="{{ maintenance[4] }}" required>
-
             <label for="status">Status:</label>
-            <select name="status" id="status" required>
-                <option value="Scheduled" {% if maintenance[5] == 'Scheduled' %}selected{% endif %}>Scheduled</option>
-                <option value="Completed" {% if maintenance[5] == 'Completed' %}selected{% endif %}>Completed</option>
-            </select>
+            <input type="text" name="status" id="status" value="Scheduled" readonly>
+
+            <h3>Past Expenses</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Expense Name</th>
+                        <th>Cost</th>
+                        <th>Notes</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr>
+                        <td><input type="text" name="expense_name[]" value="{{ expense[1] }}" required></td>
+                        <td><input type="number" name="expense_cost[]" value="{{ expense[2] }}" required></td>
+                        <td>
+                            <input type="text" name="expense_notes[]" value="{{ expense[3] }}">
+                            <input type="hidden" name="expense_id[]" value="{{ expense[0] }}">
+                        </td>
+                        <td>
+                            <input type="checkbox" name="delete_expense[]" value="{{ expense[0] }}">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h3>Add New Expenses</h3>
+            <div id="new-expenses">
+                <div>
+                    <input type="text" name="new_expense_name[]" placeholder="Expense Name">
+                    <input type="number" name="new_expense_cost[]" placeholder="Cost">
+                    <input type="text" name="new_expense_notes[]" placeholder="Notes">
+                    <button type="button" class="delete-btn" onclick="removeExpense(this)">Delete</button>
+                </div>
+            </div>
+            <button type="button" class="add-expense-btn" onclick="addExpense()">Add Another Expense</button>
 
             <button type="submit">Update Maintenance</button>
         </form>
     </div>
+
+    <script>
+        // Add a new expense row
+        function addExpense() {
+            const newExpenseDiv = document.createElement('div');
+            newExpenseDiv.innerHTML = `
+                <input type="text" name="new_expense_name[]" placeholder="Expense Name">
+                <input type="number" name="new_expense_cost[]" placeholder="Cost">
+                <input type="text" name="new_expense_notes[]" placeholder="Notes">
+                <button type="button" class="delete-btn" onclick="removeExpense(this)">Delete</button>
+            `;
+            document.getElementById('new-expenses').appendChild(newExpenseDiv);
+        }
+
+        // Remove an expense row
+        function removeExpense(button) {
+            button.parentElement.remove();
+        }
+    </script>
 
 </body>
 </html>

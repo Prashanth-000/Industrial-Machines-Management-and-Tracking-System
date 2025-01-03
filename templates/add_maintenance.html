@@ -15,18 +15,18 @@
         /* Body styling */
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #bfd8df, #99adcc); /* Light gradient background */
+            background: linear-gradient(135deg, #bfd8df, #99adcc);
             margin: 0;
             padding: 0;
         }
 
         /* Navbar styling */
         .navbar {
-            background-color: #004080; /* Deep blue */
+            background-color: #004080;
             display: flex;
             align-items: center;
             padding: 10px 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for elevation */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .navbar a {
@@ -41,31 +41,31 @@
         }
 
         .navbar a:hover {
-            background-color: #ffd700; /* Gold for hover */
+            background-color: #ffd700;
             color: #004080;
         }
 
         .navbar a.active {
-            background-color: #ffd700; /* Gold for active link */
+            background-color: #ffd700;
             color: #004080;
             font-weight: bold;
         }
 
-        /* Container for content */
+        /* Container for form */
         .container {
-            width: 600px;
-            margin: 50px auto;
-            padding: 25px;
-            background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+            width: 850px;
+            margin: 80px auto 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
-            font-size: 1.8rem; /* Slightly smaller heading */
+            font-size: 2.2rem;
             color: #333;
             margin-bottom: 20px;
-            text-align: center;
+            font-weight: bold;
         }
 
         form {
@@ -75,19 +75,19 @@
 
         label {
             font-size: 1rem;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             color: #333;
         }
 
-        input, select {
-            padding: 8px;
-            margin-bottom: 15px; /* Reduced space between inputs */
+        input, select, textarea, button {
+            padding: 10px;
+            margin-bottom: 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
             font-size: 1rem;
         }
 
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             border-color: #3498db;
             outline: none;
         }
@@ -99,39 +99,42 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
             padding: 10px;
-            border: none;
         }
 
         button:hover {
             background-color: #2980b9;
         }
 
-        /* Flash message styling */
-        .flashes {
-            list-style-type: none;
-            padding: 0;
-            margin-bottom: 20px;
-        }
-
-        .flashes li {
-            padding: 10px;
-            margin-bottom: 10px;
+        .add-expense-btn, .delete-btn {
+            display: inline-block;
+            padding: 8px 15px;
+            border: none;
             border-radius: 5px;
+            cursor: pointer;
         }
 
-        .alert-success {
-            background-color: #2ecc71;
+        .add-expense-btn {
+            background: #28a745;
             color: white;
         }
 
-        .alert-error {
-            background-color: #e74c3c;
+        .add-expense-btn:hover {
+            background: #218838;
+        }
+
+        .delete-btn {
+            margin-left: 10px;
+            background-color: red;
             color: white;
         }
 
-        .alert-info {
-            background-color: #3498db;
-            color: white;
+        .delete-btn:hover {
+            background-color: darkred;
+        }
+
+        .form-actions {
+            text-align: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -148,8 +151,7 @@
 
     <!-- Add Maintenance Form -->
     <div class="container">
-        <h1>Add Maintenance Schedule</h1>
-
+        <h1>Add Maintenance</h1>
         <form action="/add_maintenance" method="POST">
             <label for="machine_id">Machine:</label>
             <select name="machine_id" id="machine_id" required>
@@ -164,18 +166,43 @@
             <label for="maintenance_type">Maintenance Type:</label>
             <input type="text" name="maintenance_type" id="maintenance_type" required>
 
-            <label for="cost">Cost:</label>
-            <input type="number" name="cost" id="cost" step="0.01" required>
+            <label for="cost">Cost (Auto-Calculated):</label>
+            <input type="text" name="cost" id="cost" readonly value="0.00">
 
-            <label for="status">Status:</label>
-            <select name="status" id="status" required>
-                <option value="Scheduled">Scheduled</option>
-                <option value="Completed">Completed</option>
-            </select>
+            <label>Status:</label>
+            <input type="text" readonly value="Scheduled">
 
-            <button type="submit">Add Maintenance</button>
+            <h3>Expenses</h3>
+            <div id="expenses-container">
+                <!-- Placeholder for dynamically added expenses -->
+            </div>
+            <button type="button" class="add-expense-btn" onclick="addExpense()">Add Expense</button>
+
+            <div class="form-actions">
+                <button type="submit">Submit</button>
+            </div>
         </form>
     </div>
+
+    <script>
+        // Add a new expense row
+        function addExpense() {
+            const container = document.getElementById('expenses-container');
+            const expenseHTML = `
+                <div class="form-group">
+                    <input type="text" name="expense_name[]" placeholder="Expense Name" required>
+                    <input type="number" name="expense_cost[]" placeholder="Expense Cost" step="0.01" required>
+                    <textarea name="expense_notes[]" placeholder="Expense Notes" rows="2"></textarea>
+                    <button type="button" class="delete-btn" onclick="removeExpense(this)">Delete</button>
+                </div>`;
+            container.insertAdjacentHTML('beforeend', expenseHTML);
+        }
+
+        // Remove an expense row
+        function removeExpense(button) {
+            button.parentElement.remove();
+        }
+    </script>
 
 </body>
 </html>
