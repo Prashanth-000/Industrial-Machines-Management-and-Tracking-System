@@ -329,20 +329,34 @@ def add_workorder():
         due_date = request.form['due_date']
         task_description = request.form['task_description']
 
-        # Insert work order into the database
-        cursor.execute("INSERT INTO work_orders (machine_id, employee_id, work_order_date, due_date, task_description, status) VALUES (%s, %s, %s, %s, %s, 'Pending')",
-                       (machine_id, employee_id, work_order_date, due_date, task_description))
-        db.commit()
+        try:
+            # Insert work order into the database
+            cursor.execute(
+                """
+                INSERT INTO work_orders 
+                (machine_id, employee_id, work_order_date, due_date, task_description, status) 
+                VALUES (%s, %s, %s, %s, %s, 'Pending')
+                """,
+                (machine_id, employee_id, work_order_date, due_date, task_description)
+            )
+            db.commit()
 
-        # Update machine status to 'Not Available' and employee status to 'Inactive'
-        cursor.execute("UPDATE machines SET status = 'Not available' WHERE machine_id = %s", (machine_id,))
-        cursor.execute("UPDATE employees SET status = 'Inactive' WHERE employee_id = %s", (employee_id,))
-        db.commit()
+            # Update machine and employee status
+            cursor.execute("UPDATE machines SET status = 'Not available' WHERE machine_id = %s", (machine_id,))
+            cursor.execute("UPDATE employees SET status = 'Inactive' WHERE employee_id = %s", (employee_id,))
+            db.commit()
 
-        flash('Work order added successfully!', 'success')
-        return redirect('/workorders')
+            flash('Work order added successfully!', 'success')  # Success message
+            return redirect(url_for('workorders'))  # Redirect to workorders page after submission
 
-    # Fetch available machines (status = 'Available') and active employees (status = 'Active')
+        except pymysql.Error as e:
+            # Rollback the transaction and flash the error
+            db.rollback()
+            error_message = str(e.args[1])  # Extract the error message
+            flash(f'Error: {error_message}', 'error')  # Flash error message
+            return redirect(url_for('add_workorder'))  # Redirect to avoid form resubmission
+
+    # Fetch available machines and employees
     cursor.execute("SELECT machine_id, name FROM machines WHERE status = 'Available'")
     machines = cursor.fetchall()
 
@@ -361,12 +375,7 @@ def edit_workorder(work_order_id):
     cursor.execute("SELECT * FROM work_orders WHERE work_order_id = %s", (work_order_id,))
     work_order = cursor.fetchone()
 
-    # If the status is "Completed", prevent editing
-    if work_order[6] == 'Completed' and request.method == 'POST':
-        flash('This work order has already been completed and cannot be edited.', 'error')
-        return redirect(url_for('workorders'))
-
-    if request.method == 'POST':  # Handle the form submission for editing the work order
+    if request.method == 'POST':
         work_order_date = request.form['work_order_date']
         due_date = request.form['due_date']
         task_description = request.form['task_description']
@@ -374,23 +383,34 @@ def edit_workorder(work_order_id):
         machine_id = request.form['machine_id']
         employee_id = request.form['employee_id']
 
-        cursor.execute("""
-            UPDATE work_orders 
-            SET work_order_date = %s, due_date = %s, task_description = %s, status = %s 
-            WHERE work_order_id = %s
-        """, (work_order_date, due_date, task_description, status, work_order_id))
-        
-        db.commit()
-
-        # Update machine and employee status if the work order is completed
-        if status == 'Completed':
-            cursor.execute("UPDATE machines SET status = 'Available' WHERE machine_id = %s", (machine_id,))
-            cursor.execute("UPDATE employees SET status = 'Active' WHERE employee_id = %s", (employee_id,))
+        try:
+            cursor.execute(
+                """
+                UPDATE work_orders 
+                SET work_order_date = %s, due_date = %s, task_description = %s, status = %s 
+                WHERE work_order_id = %s
+                """,
+                (work_order_date, due_date, task_description, status, work_order_id)
+            )
             db.commit()
 
-        flash("Work order updated successfully!", 'success')
-        return redirect('/workorders')
+            # Update machine and employee statuses if completed
+            if status == 'Completed':
+                cursor.execute("UPDATE machines SET status = 'Available' WHERE machine_id = %s", (machine_id,))
+                cursor.execute("UPDATE employees SET status = 'Active' WHERE employee_id = %s", (employee_id,))
+                db.commit()
 
+            flash('Work order updated successfully!', 'success')
+            return redirect('/workorders')
+
+        except pymysql.Error as e:
+            # Rollback the transaction and flash the error
+            db.rollback()
+            error_message = str(e.args[1])  # Extract the error message
+            flash(f'Error: {error_message}', 'error')  # Flash error message
+            return redirect(url_for('edit_workorder', work_order_id=work_order_id))  # Redirect to avoid form resubmission
+
+    # Fetch available machines and employees
     cursor.execute("SELECT * FROM machines WHERE status = 'Available'")
     machines = cursor.fetchall()
 

@@ -53,7 +53,7 @@
 
         /* Form Container */
         .container {
-            width: 600px; /* Much smaller width */
+            width: 600px;
             margin: 50px auto;
             padding: 25px;
             background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
@@ -62,7 +62,7 @@
         }
 
         h1 {
-            font-size: 1.8rem; /* Smaller heading */
+            font-size: 1.8rem;
             color: #333;
             margin-bottom: 20px;
             text-align: center;
@@ -79,15 +79,15 @@
             color: #333;
         }
 
-        input, select, button {
+        input, select, textarea, button {
             padding: 8px;
-            margin-bottom: 15px; /* Reduced space between inputs */
+            margin-bottom: 15px;
             border-radius: 5px;
             border: 1px solid #ccc;
             font-size: 1rem;
         }
 
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             border-color: #3498db;
             outline: none;
         }
@@ -117,6 +117,7 @@
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 5px;
+            animation: fade-in 0.5s ease-in-out;
         }
 
         .alert-success {
@@ -133,13 +134,36 @@
             background-color: #3498db;
             color: white;
         }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
     </style>
+     <script>
+        // Automatically hide flash messages after 3 seconds
+        window.onload = function() {
+            setTimeout(function() {
+                const flashMessages = document.querySelectorAll('.flashes li');
+                flashMessages.forEach(message => {
+                    message.style.transition = "opacity 0.5s ease-out";
+                    message.style.opacity = 0;
+                    setTimeout(() => message.remove(), 500);
+                });
+            }, 3000);
+        };
+    </script>
+
 </head>
 <body>
 
     <!-- Navbar -->
     <div class="navbar">
-        <a href="/" >Home</a>
+        <a href="/">Home</a>
         <a href="/machines">Machines</a>
         <a href="/employees">Employees</a>
         <a href="/workorders" class="active">Work Orders</a>
@@ -148,8 +172,17 @@
     <!-- Add Work Order Form -->
     <div class="container">
         <h1>Add Work Order</h1>
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="alert alert-{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
 
-        <!-- Flash messages for success or error -->
 
         <!-- Form to add a work order -->
         <form action="/add_workorder" method="POST">
@@ -181,6 +214,8 @@
             <button type="submit">Submit</button>
         </form>
     </div>
+
+    
 
 </body>
 </html>
