@@ -213,13 +213,23 @@
    
         <!-- Form to edit work order -->
         <form action="/edit_workorder/{{ work_order[0] }}" method="POST">
-            <label for="machine_id">Machine:</label>
-            <input type="text" name="machine_id" id="machine_id" value="{{ work_order_machine_name }}" disabled>
-            <input type="hidden" name="machine_id" value="{{ work_order[1] }}">
+           <!-- Machine (non-editable, display only) -->
+<label for="machine_id">Machine:</label>
+<input type="text" name="machine_id" id="machine_id" value="{{ work_order_machine_name }}" disabled>
+<!-- Hidden field to submit machine_id -->
+<input type="hidden" name="machine_id" value="{{ work_order[1] }}">
 
-            <label for="employee_id">Employee:</label>
-            <input type="text" name="employee_id" id="employee_id" value="{{ work_order_employee_name }}" disabled>
-            <input type="hidden" name="employee_id" value="{{ work_order[2] }}">
+<!-- Employee (editable dropdown) -->
+<label for="employee_id">Employee:</label>
+<select name="employee_id" id="employee_id" {% if work_order[6] == 'Completed' %}disabled{% endif %}>
+    {% for employee in employees %}
+        <option value="{{ employee[0] }}" {% if employee[0] == work_order[2] %}selected{% endif %}>
+            {{ employee[1] }}
+        </option>
+    {% endfor %}
+</select>
+<!-- Hidden input to hold the current employee_id -->
+<input type="hidden" name="employee_id" value="{{ work_order[2] }}">
 
             <label for="work_order_date">Work Order Date:</label>
             <input type="date" name="work_order_date" id="work_order_date" value="{{ work_order[3] }}" required {% if work_order[6] == 'Completed' %}disabled{% endif %}>

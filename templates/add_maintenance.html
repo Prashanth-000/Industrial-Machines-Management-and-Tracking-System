@@ -155,8 +155,9 @@
         <form action="/add_maintenance" method="POST">
             <label for="machine_id">Machine:</label>
             <select name="machine_id" id="machine_id" required>
+                <option value="">Select a machine</option>
                 {% for machine in machines %}
-                <option value="{{ machine[0] }}">{{ machine[1] }}</option>
+                    <option value="{{ machine[0] }}">{{ machine[1] }}</option>
                 {% endfor %}
             </select>
 

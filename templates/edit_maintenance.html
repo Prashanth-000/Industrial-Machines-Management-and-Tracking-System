@@ -164,12 +164,23 @@
         <form action="/edit_maintenance/{{ maintenance[0] }}" method="POST">
             <label for="machine_id">Machine:</label>
             <select name="machine_id" id="machine_id" required>
-                {% for machine in machines %}
-                <option value="{{ machine[0] }}" {% if machine[0] == maintenance[1] %}selected{% endif %}>
-                    {{ machine[1] }}
+                <!-- Add the current machine as the first option -->
+                <option value="{{ maintenance[1] }}" selected>
+                    Current Machine
                 </option>
+            
+                <!-- Add remaining machines -->
+                {% for machine in machines %}
+                    {% if machine[0] != maintenance[1] %} <!-- Exclude the current machine -->
+                        <option value="{{ machine[0] }}">
+                            {{ machine[1] }}
+                        </option>
+                    {% endif %}
                 {% endfor %}
             </select>
+            
+            
+            
 
             <label for="scheduled_date">Scheduled Date:</label>
             <input type="date" name="scheduled_date" id="scheduled_date" value="{{ maintenance[2] }}" required>

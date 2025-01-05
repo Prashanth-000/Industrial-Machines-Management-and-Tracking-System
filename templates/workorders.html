@@ -287,7 +287,11 @@
                     <td>{{ work_order[3] }}</td>
                     <td>{{ work_order[4] }}</td>
                     <td>
-                        <a href="/edit_workorder/{{ work_order[0] }}" class="action-btn edit">Edit</a>
+                        {% if work_order[4] =='Completed' %}
+                        <a href="javascript:void(0);" class="action-btn edit" style="cursor: not-allowed;",>Edit</a>
+                        {% else %}
+                        <a href="/edit_workorder/{{ work_order[0] }}" class="action-btn edit" >Edit</a>
+                        {% endif %}
                         {% if work_order[4] != 'Pending' %}
                             <a href="javascript:void(0);" class="action-btn delete" onclick="confirmDelete({{ work_order[0] }});">Delete</a>
                         {% else %}

@@ -265,7 +265,7 @@ def edit_employee(employee_id):
         email = request.form['email']
         address = request.form['address']
         date_of_hire = request.form['date_of_hire']
-        status = employee[6]  # Keep the existing status, don't allow modification
+        status = request.form['status']  # Keep the existing status, don't allow modification
 
         cursor.execute("""
             UPDATE employees
@@ -287,12 +287,26 @@ def delete_employee(employee_id):
         return redirect(url_for('login'))
 
     cursor = db.cursor()
-    cursor.execute("DELETE FROM employees WHERE employee_id = %s", (employee_id,))  # Delete the employee by ID
-    db.commit()  # Commit the transaction
+    
+    # Check if the employee has any pending work orders
+    cursor.execute("""
+    SELECT COUNT(*) 
+    FROM work_orders 
+    WHERE employee_id = %s AND status = 'Pending'
+    """, (employee_id,))
+    pending_work_orders = cursor.fetchone()[0]
 
-    flash("Employee deleted successfully!", 'success')  # Show success message
-    return redirect('/employees')  # Redirect back to the employees page
+    if pending_work_orders > 0:
+        # If there are pending work orders, show a flash message and prevent deletion
+        flash('Employee has pending work orders, cannot delete.', 'error')
+        return redirect('/employees')
 
+    # If no pending work orders, proceed with deletion
+    cursor.execute("DELETE FROM employees WHERE employee_id = %s", (employee_id,))
+    db.commit()
+
+    flash("Employee deleted successfully!", 'success')
+    return redirect('/employees')
 
 # Work Orders Route
 @app.route('/workorders', methods=['GET'])
@@ -343,7 +357,7 @@ def add_workorder():
 
             # Update machine and employee status
             cursor.execute("UPDATE machines SET status = 'Not available' WHERE machine_id = %s", (machine_id,))
-            cursor.execute("UPDATE employees SET status = 'Inactive' WHERE employee_id = %s", (employee_id,))
+            # cursor.execute("UPDATE employees SET status = 'Inactive' WHERE employee_id = %s", (employee_id,))
             db.commit()
 
             flash('Work order added successfully!', 'success')  # Success message
@@ -360,8 +374,16 @@ def add_workorder():
     cursor.execute("SELECT machine_id, name FROM machines WHERE status = 'Available'")
     machines = cursor.fetchall()
 
-    cursor.execute("SELECT employee_id, name FROM employees WHERE status = 'Active'")
+    cursor.execute("""
+    SELECT e.employee_id, e.name
+    FROM employees e
+    LEFT JOIN work_orders w ON e.employee_id = w.employee_id AND w.status = 'Pending'
+    WHERE e.status = 'Active'
+    GROUP BY e.employee_id
+    HAVING COUNT(w.work_order_id) < 2
+    """)
     employees = cursor.fetchall()
+
 
     return render_template('add_workorder.html', machines=machines, employees=employees)
 
@@ -375,6 +397,10 @@ def edit_workorder(work_order_id):
     cursor.execute("SELECT * FROM work_orders WHERE work_order_id = %s", (work_order_id,))
     work_order = cursor.fetchone()
 
+    # Fetch the machine name for the current work order
+    cursor.execute("SELECT name FROM machines WHERE machine_id = %s", (work_order[1],))
+    work_order_machine_name = cursor.fetchone()[0]
+
     if request.method == 'POST':
         work_order_date = request.form['work_order_date']
         due_date = request.form['due_date']
@@ -387,17 +413,16 @@ def edit_workorder(work_order_id):
             cursor.execute(
                 """
                 UPDATE work_orders 
-                SET work_order_date = %s, due_date = %s, task_description = %s, status = %s 
+                SET work_order_date = %s, due_date = %s, task_description = %s, status = %s, employee_id = %s
                 WHERE work_order_id = %s
                 """,
-                (work_order_date, due_date, task_description, status, work_order_id)
+                (work_order_date, due_date, task_description, status, employee_id, work_order_id)
             )
             db.commit()
 
             # Update machine and employee statuses if completed
             if status == 'Completed':
                 cursor.execute("UPDATE machines SET status = 'Available' WHERE machine_id = %s", (machine_id,))
-                cursor.execute("UPDATE employees SET status = 'Active' WHERE employee_id = %s", (employee_id,))
                 db.commit()
 
             flash('Work order updated successfully!', 'success')
@@ -414,10 +439,30 @@ def edit_workorder(work_order_id):
     cursor.execute("SELECT * FROM machines WHERE status = 'Available'")
     machines = cursor.fetchall()
 
-    cursor.execute("SELECT * FROM employees WHERE status = 'Active'")
+    cursor.execute("""
+    -- Fetch the current employee for the work order
+    SELECT e.employee_id, e.name
+    FROM employees e
+    WHERE e.employee_id = (SELECT employee_id FROM work_orders WHERE work_order_id = %s)
+
+    UNION
+
+    -- Fetch employees with fewer than 2 pending work orders
+    SELECT e.employee_id, e.name
+    FROM employees e
+    LEFT JOIN work_orders w ON e.employee_id = w.employee_id AND w.status = 'Pending'
+    WHERE e.status = 'Active'
+    GROUP BY e.employee_id
+    HAVING COUNT(w.work_order_id) < 2
+""", (work_order_id,))
     employees = cursor.fetchall()
 
-    return render_template('edit_workorder.html', work_order=work_order, machines=machines, employees=employees)
+
+    return render_template('edit_workorder.html', 
+                           work_order=work_order, 
+                           work_order_machine_name=work_order_machine_name, 
+                           machines=machines, 
+                           employees=employees)
 
 @app.route('/delete_workorder/<int:work_order_id>', methods=['GET'])
 def delete_workorder(work_order_id):
@@ -463,6 +508,7 @@ def maintenance():
                ms.cost, ms.status
         FROM maintenance_schedules ms
         JOIN machines m ON ms.machine_id = m.machine_id
+        ORDER BY ms.status ASC, ms.scheduled_date
     """)
     maintenances = cursor.fetchall()
 
@@ -479,8 +525,20 @@ def add_maintenance():
 
     if request.method == 'GET':
         # Fetch machine list for the dropdown
-        cursor.execute("SELECT machine_id, name FROM machines")
+        cursor.execute("""
+    SELECT m.machine_id, m.name
+    FROM machines m
+    WHERE m.status = 'Available'
+    AND m.machine_id NOT IN (
+        SELECT ms.machine_id
+        FROM maintenance_schedules ms
+        WHERE ms.status = 'Scheduled'
+        GROUP BY ms.machine_id
+        HAVING COUNT(ms.schedule_id) > 1
+    )
+    """)
         machines = cursor.fetchall()
+
         return render_template('add_maintenance.html', machines=machines)
 
     if request.method == 'POST':
@@ -524,10 +582,32 @@ def edit_maintenance(maintenance_id):
 
     cursor = db.cursor()
 
+    cursor.execute("""
+        SELECT schedule_id, m.name AS machine_name, ms.scheduled_date, ms.maintenance_type,
+               ms.cost, ms.status
+        FROM maintenance_schedules ms
+        JOIN machines m ON ms.machine_id = m.machine_id
+    """)
+    maintenance = cursor.fetchall()
+
     if request.method == 'GET':
         # Fetch machine list for the dropdown
-        cursor.execute("SELECT machine_id, name FROM machines")
+        # Fetch machine list for the dropdown, including the currently assigned machine
+        cursor.execute("""
+    SELECT m.machine_id, m.name
+    FROM machines m
+    WHERE m.status = 'Available'
+    AND m.machine_id NOT IN (
+        SELECT ms.machine_id
+        FROM maintenance_schedules ms
+        WHERE ms.status = 'Scheduled'
+        GROUP BY ms.machine_id
+        HAVING COUNT(ms.schedule_id) > 1
+    )
+""")
         machines = cursor.fetchall()
+
+
 
         # Fetch the selected maintenance schedule
         cursor.execute("SELECT * FROM maintenance_schedules WHERE schedule_id = %s", (maintenance_id,))

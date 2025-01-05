@@ -168,12 +168,12 @@
             <label for="date_of_hire">Date of Hire:</label>
             <input type="date" name="date_of_hire" id="date_of_hire" value="{{ employee[5] }}" required><br>
 
-            <!-- Status is fixed as Active and cannot be changed -->
+           
             <label for="status">Status:</label>
-            <select name="status" id="status" disabled>
-                <option value="Active" {% if employee[6] == 'Active' %}selected{% endif %}>Active</option>
-                <option value="Inactive" {% if employee[6] == 'Inactive' %}selected{% endif %}>Inactive</option>
-            </select><br>
+    <select name="status" id="status">
+        <option value="Active" {% if employee[6] == 'Active' %}selected{% endif %}>Active</option>
+        <option value="Inactive" {% if employee[6] == 'Inactive' %}selected{% endif %}>Inactive</option>
+    </select><br>
 
             <button type="submit">Update Employee</button>
         </form>
