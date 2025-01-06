@@ -8,6 +8,8 @@
         body {
             font-family: 'Roboto', Arial, sans-serif;
             background: linear-gradient(135deg, #dd62cd, #a861c4);
+            background: url('/static/Images/home.jpg') no-repeat center center fixed;
+            background-size: cover;
             margin: 0;
             display: flex;
             justify-content: center;
@@ -142,6 +144,8 @@
     <p class="message">{{ message }}</p>
     {% endif %}
     <form method="POST" action="/signup">
+        <label for="mpass">Master Key</label>
+        <input type="password" name="mpass" placeholder="Enter Master Key" required>
         <label for="username">Username</label>
         <input type="text" name="username" placeholder="Enter your username" required>
         <label for="password">Password</label>

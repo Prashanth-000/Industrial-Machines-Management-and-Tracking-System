@@ -1,6 +1,5 @@
 from flask import Flask, request, redirect, url_for, flash, session
 import pymysql
-import pdfkit
 from flask import make_response, render_template
 from datetime import datetime
 
@@ -51,6 +50,11 @@ def signup():
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
+        mpass=request.form['mpass']
+        
+        if mpass !='9880':
+            flash('Incorrect Master Key.Please try again', 'error')
+            return redirect(url_for('signup'))  # Redirect for PRG pattern
         
         try:
             cursor = db.cursor()
