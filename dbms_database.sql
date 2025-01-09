@@ -67,3 +67,26 @@ CREATE TABLE admins (
     email VARCHAR(255) NOT NULL
 );
 
+--Trigger for work order dates
+DELIMITER //
+CREATE TRIGGER validate_workorder_dates
+BEFORE INSERT ON work_orders
+FOR EACH ROW
+BEGIN
+    IF NEW.work_order_date > NEW.due_date THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Work order date cannot be later than the due date.';
+    END IF;
+END;//
+CREATE TRIGGER validate_workorder_dates_update
+BEFORE UPDATE ON work_orders
+FOR EACH ROW
+BEGIN
+    IF NEW.work_order_date > NEW.due_date THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Work order date cannot be later than the due date.';
+    END IF;
+END;
+//
+DELIMITER;
+

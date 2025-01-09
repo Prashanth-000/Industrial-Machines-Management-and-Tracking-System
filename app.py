@@ -51,7 +51,7 @@ def signup():
         password = request.form['password']
         email = request.form['email']
         mpass=request.form['mpass']
-        
+
         if mpass !='9880':
             flash('Incorrect Master Key.Please try again', 'error')
             return redirect(url_for('signup'))  # Redirect for PRG pattern
@@ -87,12 +87,67 @@ def signup():
 # Home Route
 @app.route('/')
 def home():
-    if 'logged_in' in session:
-       # flash('Welcome to the homepage!', 'success')  # Flash message for logged-in users
-        return render_template('home.html')
-    else:
-        flash('Please log in to access the home page.', 'info')  # Flash message for non-logged-in users
+    if 'logged_in' not in session:
+        flash('Please log in to access the home page.', 'info')
         return redirect(url_for('login'))
+    
+    cursor = db.cursor()
+
+    # Fetch total machines and machines under maintenance
+    cursor.execute("SELECT COUNT(*) FROM machines")
+    total_machines = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT COUNT(*) 
+        FROM maintenance_schedules 
+        WHERE status = 'Scheduled'
+    """)
+    machines_under_maintenance = cursor.fetchone()[0]
+
+    # Fetch total employees and active employees
+    cursor.execute("SELECT COUNT(*) FROM employees")
+    total_employees = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM employees WHERE status = 'Active'")
+    active_employees = cursor.fetchone()[0]
+
+    # Fetch total work orders and their status breakdown
+    cursor.execute("SELECT COUNT(*) FROM work_orders")
+    work_orders_total = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM work_orders WHERE status = 'Pending'")
+    pending_work_orders = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM work_orders WHERE status = 'Completed'")
+    completed_work_orders = cursor.fetchone()[0]
+
+    # Fetch maintenance breakdown for the chart
+    cursor.execute("""
+        SELECT maintenance_type, COUNT(*) 
+        FROM maintenance_schedules 
+        WHERE status = 'Scheduled' 
+        GROUP BY maintenance_type
+    """)
+    maintenance_data = cursor.fetchall()
+    maintenance_types = [row[0] for row in maintenance_data]
+    maintenance_counts = [row[1] for row in maintenance_data]
+
+    # Close the cursor
+    cursor.close()
+
+    # Render the home page with data
+    return render_template(
+        'home.html',
+        total_machines=total_machines,
+        machines_under_maintenance=machines_under_maintenance,
+        total_employees=total_employees,
+        active_employees=active_employees,
+        work_orders_total=work_orders_total,
+        pending_work_orders=pending_work_orders,
+        completed_work_orders=completed_work_orders,
+        maintenance_types=maintenance_types,
+        maintenance_counts=maintenance_counts
+    )
 
 # Logout Route
 @app.route('/logout')
