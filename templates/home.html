@@ -83,8 +83,10 @@
         .content {
             flex: 1;
             padding: 20px;
-            margin-left: 275px;
-            overflow: hidden; /* Prevent inner scrolling */
+            margin-left: 275px; /* Adjust based on sidebar width */
+            overflow-y:scroll;  /* Give 'Hidden' To Prevent Inner Scrolling */
+            scrollbar-color: #00408000 #c1e9db00; /* Firefox */
+            
         }
         .chart-container {
             background-color: rgba(235, 228, 230, 0.9);
@@ -104,8 +106,22 @@
         }
         footer {
             text-align: center;
+            font-weight: bolder;
+            background-color: #d3be93;
+            margin-left: 47%;
+            width: 165px;
             margin-top: 10px;
-            color: #004080;
+            color: #e90e0eab;
+            border-radius: 5PX;
+          
+        }
+        footer a {
+            color: #e90e0eab;
+            text-decoration: none;
+            &:hover {
+                text-decoration: underline;
+                color: blueviolet;
+            }
         }
     </style>
 </head>
@@ -139,7 +155,7 @@
     </div>
 
     <footer>
-        <p>Powered by <a href="#">DBMS</a></p>
+        <p>Powered by <a href="https://github.com/Prashanth-000" target="_blank">PFB-000</a></p>
     </footer>
 
     <script>
