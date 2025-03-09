@@ -90,19 +90,18 @@ python app.py
 ## 📷 Screenshots
 
 Below are the screenshots of the application, stored in the `static/result/` folder:
-## 📷 Screenshots
 
 ### 🔹 Login Page
-![Login Page](static/result/Screenshot 2025-01-06 130645.png)
+![Login Page](./static/result/Screenshot 2025-01-06 130645.png)
 
 ### 🔹 Maintenance Management
-![Maintenance Page](static/result/Screenshot 2025-01-04 221728.png)
+![Maintenance Page](./static/result/Screenshot 2025-01-04 221728.png)
 
 ### 🔹 Work Orders
-![Work Orders](static/result/Screenshot 2025-01-04 222204.png)
+![Work Orders](./static/result/Screenshot 2025-01-04 222204.png)
 
 ### 🔹 Reports Page
-![Reports](static/result/Screenshot 2025-01-04 221839.png)
+![Reports](./static/result/Screenshot 2025-01-04 221839.png)
 
 
 ## 📜 License
