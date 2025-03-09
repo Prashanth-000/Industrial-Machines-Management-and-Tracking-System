@@ -1,70 +1,115 @@
-pip install weasyprint
-pip install pdfkit
-Go to the wkhtmltopdf downloads page.
-Download the Windows installer (choose the latest stable version).
-Install the downloaded .exe file.
-then change path as below---line 645(inside download_report route) for
-path_to_wkhtmltopdf = r"C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe"
+# Industrial Machine Maintenance Tracker
 
-Now Run app.py
+## 📌 Project Overview
 
- <!-- Flash Messages -->
+This project is a **Flask-based Industrial Machine Maintenance Tracker** that helps manage machines, employees, work orders, and maintenance schedules efficiently. It includes features such as adding and editing machines, tracking maintenance schedules, and managing work orders.
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for category, message in messages %}
-                    <li class="alert alert-{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-        {% endwith %}
+## 🚀 Features
 
- <script>
-        // Automatically hide flash messages after 3 seconds
-        window.onload = function() {
-            setTimeout(function() {
-                const flashMessages = document.querySelectorAll('.flashes li');
-                flashMessages.forEach(message => {
-                    message.style.transition = "opacity 0.5s ease-out";
-                    message.style.opacity = 0;
-                    setTimeout(() => message.remove(), 500);
-                });
-            }, 3000);
-        };
-    </script>
+- **User Authentication**: Secure login and signup for administrators.
+- **Machine Management**: Add, edit, and view machine details.
+- **Employee Management**: Track employees and their assigned maintenance tasks.
+- **Maintenance Scheduling**:
+  - Assign employees to maintenance tasks.
+  - Machines under maintenance are marked as "Not Available."
+  - Completed maintenance updates the machine's status and parts used.
+- **Work Orders**: Manage and update work orders efficiently.
+- **Reporting**: View detailed maintenance history and reports.
 
-        .flashes {
-            list-style-type: none;
-            padding: 0;
-            margin-bottom: 20px;
-        }
-        .flashes li {
+## 📂 Folder Structure
 
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-        .alert-success {
-            background-color: #76f0a9;
-            color: white;
-            color: rgb(0, 0, 0);
-        }
-        .alert-error {
-            background-color: #e74c3c;
-            color: white;
-        }
-        .alert-info {
-            background-color: #189599; /* Light blue for logout message */
-            color: white;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+```
+INDUSTRIAL_MAINTENANCE_TRACKER/
+│── static/
+│   ├── result/(result images)
+│   ├── images/ (for assets)
+│
+│── templates/
+│   ├── add_employee.html
+│   ├── add_machine.html
+│   ├── add_maintenance.html
+│   ├── add_workorder.html
+│   ├── edit_employee.html
+│   ├── edit_machine.html
+│   ├── edit_maintenance.html
+│   ├── edit_workorder.html
+│   ├── employees.html
+│   ├── home.html
+│   ├── login.html
+│   ├── machines.html
+│   ├── maintenance.html
+│   ├── report.html
+│   ├── signup.html
+│   ├── workorders.html
+│
+│── app.py
+│── config.py
+│── machine_tracker.db (SQLite database)
+│── machine_tracker.sql (SQL Schema)
+│── readme.md
+│── requirements.txt
+```
+
+## 🔧 Installation & Setup
+
+### 1️⃣ Prerequisites
+
+- Python 3.x
+- Flask
+- MySQL (XAMPP recommended for local setup)
+
+### 2️⃣ Clone the Repository
+
+```sh
+git clone https://github.com/Prashanth-000/Industrial-Machines-Management-and-Tracking-System.git
+
+cd industrial-maintenance-tracker
+```
+
+### 3️⃣ Install Dependencies
+
+```sh
+pip install -r requirements.txt
+```
+
+### 4️⃣ Configure the Database
+
+- Import `dbms_database.sql` into MySQL.
+- Update `app..py` with your database credentials.
+- Add credentials in MySQL Database connection settings line 11
+
+### 5️⃣ Run the Application
+
+```sh
+python app.py
+```
+
+- Open `http://127.0.0.1:5000/` in your browser.
+- Master Password for SignUp `9880`
+
+## 📷 Screenshots
+
+Below are the screenshots of the application, stored in the `static/result/` folder:
+## 📷 Screenshots
+
+### 🔹 Login Page
+![Login Page](static/result/Screenshot 2025-01-06 130645.png)
+
+### 🔹 Maintenance Management
+![Maintenance Page](static/result/Screenshot 2025-01-04 221728.png)
+
+### 🔹 Work Orders
+![Work Orders](static/result/Screenshot 2025-01-04 222204.png)
+
+### 🔹 Reports Page
+![Reports](static/result/Screenshot 2025-01-04 221839.png)
+
+
+## 📜 License
+
+This project is open-source and available under the **MIT License**.
+
+---
+
+✨ **Developed with Python Flask & MySQL** ✨
+✨ **BY PFB-000** ✨
